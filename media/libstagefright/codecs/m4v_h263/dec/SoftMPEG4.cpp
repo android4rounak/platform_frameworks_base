@@ -446,8 +446,10 @@ void SoftMPEG4::onQueueFilled(OMX_U32 portIndex) {
 
         CHECK_LE(bufferSize, inHeader->nFilledLen);
         inHeader->nOffset += inHeader->nFilledLen - bufferSize;
-        inHeader->nFilledLen = bufferSize;
 
+        //Change by embest
+        //This will cause video play stuck in first frame, it is google's bug
+        inHeader->nFilledLen -= bufferSize;
         if (inHeader->nFilledLen == 0) {
             inInfo->mOwnedByUs = false;
             inQueue.erase(inQueue.begin());
