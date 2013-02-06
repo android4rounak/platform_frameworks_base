@@ -447,6 +447,7 @@ bool SurfaceFlinger::threadLoop()
         hw.compositionComplete();
         usleep(16667); // 60 fps period
     }
+
     return true;
 }
 
@@ -1334,7 +1335,7 @@ sp<Layer> SurfaceFlinger::createNormalSurface(
     switch (format) { // TODO: take h/w into account
     case PIXEL_FORMAT_TRANSPARENT:
     case PIXEL_FORMAT_TRANSLUCENT:
-        format = PIXEL_FORMAT_RGBA_8888;
+        format = PIXEL_FORMAT_BGRA_8888;
         break;
     case PIXEL_FORMAT_OPAQUE:
 #ifdef NO_RGBX_8888
@@ -1347,7 +1348,7 @@ sp<Layer> SurfaceFlinger::createNormalSurface(
 
 #ifdef NO_RGBX_8888
     if (format == PIXEL_FORMAT_RGBX_8888)
-        format = PIXEL_FORMAT_RGBA_8888;
+        format = PIXEL_FORMAT_BGRA_8888;
 #endif
 
     sp<Layer> layer = new Layer(this, display, client);
