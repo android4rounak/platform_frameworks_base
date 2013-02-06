@@ -1033,6 +1033,12 @@ public class NetworkController extends BroadcastReceiver {
                 mDataTypeIconId = 0;
             }
         }
+		if (mAirplaneMode == false) {
+			if (!hasService()) {
+				mPhoneSignalIconId = R.drawable.stat_sys_signal_null;
+				mDataSignalIconId = R.drawable.stat_sys_signal_null;
+			}
+		}
 
         if (DEBUG) {
             Slog.d(TAG, "refreshViews connected={"

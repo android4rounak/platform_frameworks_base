@@ -206,6 +206,12 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
     private void prepareDialog() {
         final boolean silentModeOn =
                 mAudioManager.getRingerMode() != AudioManager.RINGER_MODE_NORMAL;
+		if (Settings.System.getInt(mContext.getContentResolver(),
+					                Settings.System.AIRPLANE_MODE_ON, 0) != 0)
+			mAirplaneState = ToggleAction.State.On;
+		else
+			mAirplaneState = ToggleAction.State.Off;
+
         mAirplaneModeOn.updateState(mAirplaneState);
         mAdapter.notifyDataSetChanged();
         if (mKeyguardShowing) {
@@ -388,7 +394,7 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
             }
 
             public boolean inTransition() {
-                return inTransition;
+                return false;
             }
         }
 
