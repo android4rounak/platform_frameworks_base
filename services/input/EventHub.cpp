@@ -63,6 +63,10 @@
 #define INDENT2 "    "
 #define INDENT3 "      "
 
+#ifdef HAVE_POSIX_CLOCKS
+#undef HAVE_POSIX_CLOCKS
+#endif
+
 namespace android {
 
 static const char *WAKE_LOCK_ID = "KeyEvents";
