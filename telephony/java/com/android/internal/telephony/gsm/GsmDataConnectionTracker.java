@@ -1676,7 +1676,7 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
         intent.putExtra(DATA_STALL_ALARM_TAG_EXTRA, mDataStallAlarmTag);
         mDataStallAlarmIntent = PendingIntent.getBroadcast(mPhone.getContext(), 0, intent,
                 PendingIntent.FLAG_UPDATE_CURRENT);
-        am.set(AlarmManager.ELAPSED_REALTIME_WAKEUP,
+        am.set(AlarmManager.ELAPSED_REALTIME,
                 SystemClock.elapsedRealtime() + delayInMs, mDataStallAlarmIntent);
     }
 
