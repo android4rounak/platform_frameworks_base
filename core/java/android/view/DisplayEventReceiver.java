@@ -58,7 +58,6 @@ public abstract class DisplayEventReceiver {
         }
 
         mMessageQueue = looper.getQueue();
-        mReceiverPtr = nativeInit(this, mMessageQueue);
 
         mCloseGuard.open("dispose");
     }
@@ -88,7 +87,6 @@ public abstract class DisplayEventReceiver {
         }
 
         if (mReceiverPtr != 0) {
-            nativeDispose(mReceiverPtr);
             mReceiverPtr = 0;
         }
         mMessageQueue = null;
@@ -129,7 +127,6 @@ public abstract class DisplayEventReceiver {
             Log.w(TAG, "Attempted to schedule a vertical sync pulse but the display event "
                     + "receiver has already been disposed.");
         } else {
-            nativeScheduleVsync(mReceiverPtr);
         }
     }
 

@@ -1820,7 +1820,6 @@ public final class ActivityManagerService extends ActivityManagerNative
         if (mFocusedActivity != r) {
             mFocusedActivity = r;
             if (r != null) {
-                mWindowManager.setFocusedApp(r.appToken, true);
             }
         }
     }
@@ -2901,8 +2900,6 @@ public final class ActivityManagerService extends ActivityManagerNative
             
             if (self.state == ActivityState.RESUMED
                     || self.state == ActivityState.PAUSING) {
-                mWindowManager.overridePendingAppTransition(packageName,
-                        enterAnim, exitAnim, null);
             }
             
             Binder.restoreCallingIdentity(origId);
@@ -3656,7 +3653,6 @@ public final class ActivityManagerService extends ActivityManagerNative
         if (reason != null) {
             intent.putExtra("reason", reason);
         }
-        mWindowManager.closeSystemDialogs(reason);
 
         for (int i=mMainStack.mHistory.size()-1; i>=0; i--) {
             ActivityRecord r = (ActivityRecord)mMainStack.mHistory.get(i);
@@ -4340,7 +4336,6 @@ public final class ActivityManagerService extends ActivityManagerNative
     void enableScreenAfterBoot() {
         EventLog.writeEvent(EventLogTags.BOOT_PROGRESS_ENABLE_SCREEN,
                 SystemClock.uptimeMillis());
-        mWindowManager.enableScreenAfterBoot();
 
         synchronized (this) {
             updateEventDispatchingLocked();
@@ -4349,7 +4344,6 @@ public final class ActivityManagerService extends ActivityManagerNative
 
     public void showBootMessage(final CharSequence msg, final boolean always) {
         enforceNotIsolatedCaller("showBootMessage");
-        mWindowManager.showBootMessage(msg, always);
     }
 
     public void dismissKeyguardOnNextActivity() {
@@ -7187,7 +7181,6 @@ public final class ActivityManagerService extends ActivityManagerNative
     }
 
     private void updateEventDispatchingLocked() {
-        mWindowManager.setEventDispatching(mBooted && !mWentToSleep && !mShuttingDown);
     }
 
     public void setLockScreenShown(boolean shown) {
@@ -12272,7 +12265,6 @@ public final class ActivityManagerService extends ActivityManagerNative
         synchronized(this) {
             if (values == null && mWindowManager != null) {
                 // sentinel: fetch the current configuration from the window manager
-                values = mWindowManager.computeNewConfiguration();
             }
 
             if (mWindowManager != null) {
@@ -12397,7 +12389,6 @@ public final class ActivityManagerService extends ActivityManagerNative
         }
         
         if (values != null && mWindowManager != null) {
-            mWindowManager.setNewConfiguration(mConfiguration);
         }
         
         return kept;
@@ -14156,8 +14147,6 @@ public final class ActivityManagerService extends ActivityManagerNative
                     return false;
                 }
 
-                mWindowManager.startFreezingScreen(R.anim.screen_user_exit,
-                        R.anim.screen_user_enter);
 
                 boolean needStart = false;
 
@@ -14175,11 +14164,9 @@ public final class ActivityManagerService extends ActivityManagerNative
                 mUserLru.remove(userIdInt);
                 mUserLru.add(userIdInt);
 
-                mWindowManager.setCurrentUser(userId);
 
                 // Once the internal notion of the active user has switched, we lock the device
                 // with the option to show the user switcher on the keyguard.
-                mWindowManager.lockNow(null);
 
                 final UserStartedState uss = mStartedUsers.get(userId);
 
@@ -14372,7 +14359,6 @@ public final class ActivityManagerService extends ActivityManagerNative
                 uss.switching = false;
             }
             if (!uss.switching && !uss.initializing) {
-                mWindowManager.stopFreezingScreen();
                 unfrozen = true;
             }
         }

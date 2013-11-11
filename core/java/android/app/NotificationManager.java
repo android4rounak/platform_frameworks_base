@@ -150,14 +150,6 @@ public class NotificationManager
             notification.sound = notification.sound.getCanonicalUri();
         }
         if (localLOGV) Log.v(TAG, pkg + ": notify(" + id + ", " + notification + ")");
-        try {
-            service.enqueueNotificationWithTag(pkg, tag, id, notification, idOut,
-                    user.getIdentifier());
-            if (id != idOut[0]) {
-                Log.w(TAG, "notify: id corrupted: sent " + id + ", got back " + idOut[0]);
-            }
-        } catch (RemoteException e) {
-        }
     }
 
     /**
@@ -180,10 +172,6 @@ public class NotificationManager
         INotificationManager service = getService();
         String pkg = mContext.getPackageName();
         if (localLOGV) Log.v(TAG, pkg + ": cancel(" + id + ")");
-        try {
-            service.cancelNotificationWithTag(pkg, tag, id, UserHandle.myUserId());
-        } catch (RemoteException e) {
-        }
     }
 
     /**
@@ -194,10 +182,6 @@ public class NotificationManager
         INotificationManager service = getService();
         String pkg = mContext.getPackageName();
         if (localLOGV) Log.v(TAG, pkg + ": cancel(" + id + ")");
-        try {
-            service.cancelNotificationWithTag(pkg, tag, id, user.getIdentifier());
-        } catch (RemoteException e) {
-        }
     }
 
     /**

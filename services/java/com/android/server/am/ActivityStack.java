@@ -1417,7 +1417,7 @@ final class ActivityStack {
             // Launcher...
             if (mMainStack) {
                 ActivityOptions.abort(options);
-                return mService.startHomeActivityLocked(mCurrentUser);
+		return false;
             }
         }
 
@@ -1732,13 +1732,6 @@ final class ActivityStack {
                     next.hasBeenLaunched = true;
                 } else {
                     if (SHOW_APP_STARTING_PREVIEW && mMainStack) {
-                        mService.mWindowManager.setAppStartingWindow(
-                                next.appToken, next.packageName, next.theme,
-                                mService.compatibilityInfoForPackageLocked(
-                                        next.info.applicationInfo),
-                                next.nonLocalizedLabel,
-                                next.labelRes, next.icon, next.windowFlags,
-                                null, true);
                     }
                 }
                 startSpecificActivityLocked(next, true, false);

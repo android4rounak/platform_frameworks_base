@@ -9863,6 +9863,8 @@ public class WindowManagerService extends IWindowManager.Stub
         boolean leakedSurface = false;
         boolean killedApps = false;
 
+        if (true)
+            return leakedSurface || killedApps;
         EventLog.writeEvent(EventLogTags.WM_NO_SURFACE_MEMORY, winAnimator.mWin.toString(),
                 winAnimator.mSession.mPid, operation);
 

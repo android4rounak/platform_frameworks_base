@@ -261,8 +261,6 @@ class ServerThread extends Thread {
             Slog.i(TAG, "User Service");
             ServiceManager.addService(Context.USER_SERVICE,
                     UserManagerService.getInstance());
-
-
             mContentResolver = context.getContentResolver();
 
             // The AccountManager must come before the ContentService
@@ -304,26 +302,6 @@ class ServerThread extends Thread {
             Slog.i(TAG, "Init Watchdog");
             Watchdog.getInstance().init(context, battery, power, alarm,
                     ActivityManagerService.self());
-
-            Slog.i(TAG, "Input Manager");
-            inputManager = new InputManagerService(context, wmHandler);
-
-            Slog.i(TAG, "Window Manager");
-            wm = WindowManagerService.main(context, power, display, inputManager,
-                    uiHandler, wmHandler,
-                    factoryTest != SystemServer.FACTORY_TEST_LOW_LEVEL,
-                    !firstBoot, onlyCore);
-            ServiceManager.addService(Context.WINDOW_SERVICE, wm);
-            ServiceManager.addService(Context.INPUT_SERVICE, inputManager);
-
-            ActivityManagerService.self().setWindowManager(wm);
-
-            inputManager.setWindowManagerCallbacks(wm.getInputMonitor());
-            inputManager.start();
-
-            display.setWindowManager(wm);
-            display.setInputManager(inputManager);
-
             // Skip Bluetooth if we have an emulator kernel
             // TODO: Use a more reliable check to see if this product should
             // support Bluetooth - see bug 988521
@@ -357,14 +335,6 @@ class ServerThread extends Thread {
         // Bring up services needed for UI.
         if (factoryTest != SystemServer.FACTORY_TEST_LOW_LEVEL) {
             try {
-                Slog.i(TAG, "Input Method Service");
-                imm = new InputMethodManagerService(context, wm);
-                ServiceManager.addService(Context.INPUT_METHOD_SERVICE, imm);
-            } catch (Throwable e) {
-                reportWtf("starting Input Manager Service", e);
-            }
-
-            try {
                 Slog.i(TAG, "Accessibility Manager");
                 ServiceManager.addService(Context.ACCESSIBILITY_SERVICE,
                         new AccessibilityManagerService(context));
@@ -374,23 +344,9 @@ class ServerThread extends Thread {
         }
 
         try {
-            wm.displayReady();
-        } catch (Throwable e) {
-            reportWtf("making display ready", e);
-        }
-
-        try {
             pm.performBootDexOpt();
         } catch (Throwable e) {
             reportWtf("performing boot dexopt", e);
-        }
-
-        try {
-            ActivityManagerNative.getDefault().showBootMessage(
-                    context.getResources().getText(
-                            com.android.internal.R.string.android_upgrading_starting_apps),
-                            false);
-        } catch (RemoteException e) {
         }
 
         if (factoryTest != SystemServer.FACTORY_TEST_LOW_LEVEL) {
@@ -422,14 +378,6 @@ class ServerThread extends Thread {
                 ServiceManager.addService(Context.DEVICE_POLICY_SERVICE, devicePolicy);
             } catch (Throwable e) {
                 reportWtf("starting DevicePolicyService", e);
-            }
-
-            try {
-                Slog.i(TAG, "Status Bar");
-                statusBar = new StatusBarManagerService(context, wm);
-                ServiceManager.addService(Context.STATUS_BAR_SERVICE, statusBar);
-            } catch (Throwable e) {
-                reportWtf("starting StatusBarManagerService", e);
             }
 
             try {
@@ -553,15 +501,6 @@ class ServerThread extends Thread {
             }
 
             try {
-                Slog.i(TAG, "Notification Manager");
-                notification = new NotificationManagerService(context, statusBar, lights);
-                ServiceManager.addService(Context.NOTIFICATION_SERVICE, notification);
-                networkPolicy.bindNotificationManager(notification);
-            } catch (Throwable e) {
-                reportWtf("starting Notification Manager", e);
-            }
-
-            try {
                 Slog.i(TAG, "Device Storage Monitor");
                 ServiceManager.addService(DeviceStorageMonitorService.SERVICE,
                         new DeviceStorageMonitorService(context));
@@ -601,28 +540,6 @@ class ServerThread extends Thread {
                 reportWtf("starting DropBoxManagerService", e);
             }
 
-            if (context.getResources().getBoolean(
-                        com.android.internal.R.bool.config_enableWallpaperService)) {
-                try {
-                    Slog.i(TAG, "Wallpaper Service");
-                    if (!headless) {
-                        wallpaper = new WallpaperManagerService(context);
-                        ServiceManager.addService(Context.WALLPAPER_SERVICE, wallpaper);
-                    }
-                } catch (Throwable e) {
-                    reportWtf("starting Wallpaper Service", e);
-                }
-            }
-
-            if (!"0".equals(SystemProperties.get("system_init.startaudioservice"))) {
-                try {
-                    Slog.i(TAG, "Audio Service");
-                    ServiceManager.addService(Context.AUDIO_SERVICE, new AudioService(context));
-                } catch (Throwable e) {
-                    reportWtf("starting Audio Service", e);
-                }
-            }
-
             try {
                 Slog.i(TAG, "Dock Observer");
                 // Listen for dock station changes
@@ -634,8 +551,6 @@ class ServerThread extends Thread {
             try {
                 Slog.i(TAG, "Wired Accessory Manager");
                 // Listen for wired headset changes
-                inputManager.setWiredAccessoryCallbacks(
-                        new WiredAccessoryManager(context, inputManager));
             } catch (Throwable e) {
                 reportWtf("starting WiredAccessoryManager", e);
             }
@@ -752,7 +667,7 @@ class ServerThread extends Thread {
 
         // Before things start rolling, be sure we have decided whether
         // we are in safe mode.
-        final boolean safeMode = wm.detectSafeMode();
+        final boolean safeMode = false;
         if (safeMode) {
             ActivityManagerService.self().enterSafeMode();
             // Post the safe mode state in the Zygote class
@@ -786,20 +701,6 @@ class ServerThread extends Thread {
             }
         }
 
-        if (notification != null) {
-            try {
-                notification.systemReady();
-            } catch (Throwable e) {
-                reportWtf("making Notification Service ready", e);
-            }
-        }
-
-        try {
-            wm.systemReady();
-        } catch (Throwable e) {
-            reportWtf("making Window Manager Service ready", e);
-        }
-
         if (safeMode) {
             ActivityManagerService.self().showSafeModeOverlay();
         }
@@ -807,12 +708,6 @@ class ServerThread extends Thread {
         // Update the configuration for this context by hand, because we're going
         // to start using it before the config change done in wm.systemReady() will
         // propagate to it.
-        Configuration config = wm.computeNewConfiguration();
-        DisplayMetrics metrics = new DisplayMetrics();
-        WindowManager w = (WindowManager)context.getSystemService(Context.WINDOW_SERVICE);
-        w.getDefaultDisplay().getMetrics(metrics);
-        context.getResources().updateConfiguration(config, metrics);
-
         try {
             power.systemReady(twilight, dreamy);
         } catch (Throwable e) {
