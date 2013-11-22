@@ -540,6 +540,15 @@ class ServerThread extends Thread {
                 reportWtf("starting DropBoxManagerService", e);
             }
 
+            if (!"0".equals(SystemProperties.get("system_init.startaudioservice"))) {
+                try {
+                    Slog.i(TAG, "Audio Service");
+                    ServiceManager.addService(Context.AUDIO_SERVICE, new AudioService(context));
+                } catch (Throwable e) {
+                    reportWtf("starting Audio Service", e);
+                }
+            }
+
             try {
                 Slog.i(TAG, "Dock Observer");
                 // Listen for dock station changes
