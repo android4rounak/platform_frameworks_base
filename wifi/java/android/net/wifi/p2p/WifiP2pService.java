@@ -16,13 +16,10 @@
 
 package android.net.wifi.p2p;
 
-import android.app.Activity;
-import android.app.ActivityManager;
 import android.app.AlertDialog;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
-import android.app.ActivityManager.RunningTaskInfo;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -111,7 +108,6 @@ public class WifiP2pService extends IWifiP2pManager.Stub {
     INetworkManagementService mNwService;
     private DhcpStateMachine mDhcpStateMachine;
 
-    private ActivityManager mActivityMgr;
 
     private P2pStateMachine mP2pStateMachine;
     private AsyncChannel mReplyChannel = new AsyncChannel();
@@ -303,7 +299,6 @@ public class WifiP2pService extends IWifiP2pManager.Stub {
 
         //STOPSHIP: get this from native side
         mInterface = "p2p0";
-        mActivityMgr = (ActivityManager)context.getSystemService(Activity.ACTIVITY_SERVICE);
 
         mNetworkInfo = new NetworkInfo(ConnectivityManager.TYPE_WIFI_P2P, 0, NETWORKTYPE, "");
 
@@ -2790,12 +2785,8 @@ public class WifiP2pService extends IWifiP2pManager.Stub {
     private boolean isForegroundApp(String pkgName) {
         if (pkgName == null) return false;
 
-        List<RunningTaskInfo> tasks = mActivityMgr.getRunningTasks(1);
-        if (tasks.size() == 0) {
             return false;
-        }
 
-        return pkgName.equals(tasks.get(0).baseActivity.getPackageName());
     }
 
     }
